@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux Find və Grep Komandaları - Ətraflı Bələdçi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: #1a202c;
+            background: #0f172a;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0 0L50 50M50 0L0 50M50 50L100 100M100 50L50 100" stroke="rgba(255,255,255,0.05)" stroke-width="2"/></svg>');
+            opacity: 0.3;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            position: relative;
+            font-weight: 300;
+        }
+
+        nav {
+            background: linear-gradient(to right, #f8fafc, #f1f5f9);
+            padding: 0;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #334155;
+            font-weight: 600;
+            padding: 20px 30px;
+            transition: all 0.3s ease;
+            display: block;
+            border-bottom: 3px solid transparent;
+            font-size: 0.95em;
+        }
+
+        nav a:hover {
+            background: #e0f2fe;
+            color: #0284c7;
+            border-bottom-color: #0284c7;
+        }
+
+        .content {
+            padding: 60px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        section {
+            margin-bottom: 80px;
+        }
+
+        h2 {
+            color: #0f172a;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 4px solid #3b82f6;
+            font-weight: 700;
+            position: relative;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100px;
+            height: 4px;
+            background: #06b6d4;
+        }
+
+        h3 {
+            color: #1e40af;
+            font-size: 1.8em;
+            margin: 35px 0 20px 0;
+            font-weight: 600;
+        }
+
+        h4 {
+            color: #334155;
+            font-size: 1.3em;
+            margin: 25px 0 15px 0;
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border: 1px solid #334155;
+        }
+
+        .code-block code {
+            color: #e2e8f0;
+        }
+
+        .command {
+            color: #22d3ee;
+            font-weight: 600;
+        }
+
+        .option {
+            color: #a78bfa;
+        }
+
+        .string {
+            color: #fbbf24;
+        }
+
+        .comment {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
+            border-left: 5px solid #0284c7;
+            padding: 24px;
+            margin: 25px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.1);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef9e6 100%);
+            border-left: 5px solid #f59e0b;
+            padding: 24px;
+            margin: 25px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #f3e8ff 0%, #fae8ff 100%);
+            border-left: 5px solid #9333ea;
+            padding: 24px;
+            margin: 25px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(147, 51, 234, 0.1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin: 30px 0;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 28px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15);
+            border-color: #3b82f6;
+        }
+
+        .card h4 {
+            color: #1e40af;
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 25px 0;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 18px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        td {
+            padding: 16px 18px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        td code {
+            background: #f1f5f9;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: #0f172a;
+            font-size: 0.9em;
+            font-family: 'SF Mono', 'Monaco', monospace;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            text-align: center;
+            padding: 40px;
+        }
+
+        footer p {
+            margin: 8px 0;
+        }
+
+        .emoji {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        strong {
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            header {
+                padding: 40px 20px;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            nav a {
+                padding: 15px 20px;
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
+
+            nav a:hover {
+                border-left-color: #0284c7;
+                border-bottom-color: transparent;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            h2 {
+                font-size: 2em;
+            }
+
+            h3 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐧 Linux Find və Grep Komandaları</h1>
+            <p>Ətraflı Bələdçi və Praktiki Nümunələr</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#find">📁 Find Komandası</a></li>
+                <li><a href="#grep">🔍 Grep Komandası</a></li>
+                <li><a href="#examples">💡 Praktiki Nümunələr</a></li>
+                <li><a href="#tips">⚡ İpuçları</a></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <!-- FIND SECTION -->
+            <section id="find">
+                <h2>📁 Find Komandası</h2>
+                
+                <p><strong>Find</strong> komandası Linux sistemlərində file və directory-ləri axtarmaq üçün ən güclü tool-lardan biridir. Bu komanda sizə müxtəlif kriterlərə əsasən file system üzərində search aparmağa imkan verir.</p>
+
+                <h3>Əsas Sintaksis</h3>
+                <div class="code-block">
+<code><span class="command">find</span> <span class="option">[path]</span> <span class="option">[options]</span> <span class="option">[expression]</span></code>
+                </div>
+
+                <div class="info-box">
+                    <strong>📝 Parametrlər:</strong>
+                    <ul>
+                        <li><strong>[path]</strong> - Axtarışın başlayacağı directory</li>
+                        <li><strong>[options]</strong> - Komandanın davranışını idarə edən parametrlər</li>
+                        <li><strong>[expression]</strong> - Axtarış meyarları</li>
+                    </ul>
+                </div>
+
+                <h3>Tez-tez İstifadə Olunan Path-lər</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>/ (Root directory)</h4>
+                        <p>Bütün file system-i axtarır</p>
+                        <div class="code-block">
+<code><span class="command">find</span> <span class="string">/</span> -name <span class="string">"fayl.txt"</span></code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>. (Current directory)</h4>
+                        <p>Hazırkı directory-dən axtarışa başlayır</p>
+                        <div class="code-block">
+<code><span class="command">find</span> <span class="string">.</span> -name <span class="string">"*.log"</span></code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>~ (Home directory)</h4>
+                        <p>İstifadəçinin home directory-sindən axtarır</p>
+                        <div class="code-block">
+<code><span class="command">find</span> <span class="string">~</span> -type d</code>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Search Kriterleri</h3>
+
+                <h4>1️⃣ Name-ə Görə Axtarış</h4>
+                <div class="example-box">
+                    <strong>Example-lər:</strong>
+                    <div class="code-block">
+<code><span class="comment"># Dəqiq match</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-name</span> <span class="string">"fayl.txt"</span>
+
+<span class="comment"># Case-insensitive search</span>
+<span class="command">find</span> <span class="string">/var/log</span> <span class="option">-iname</span> <span class="string">"*log*"</span>
+
+<span class="comment"># Wildcard ilə search</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-name</span> <span class="string">"*.pdf"</span>  <span class="comment"># Bütün PDF file-ları</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-name</span> <span class="string">"hesabat_*"</span>  <span class="comment"># hesabat_ ilə başlayan file-lar</span></code>
+                    </div>
+                </div>
+
+                <h4>2️⃣ Type-a Görə Axtarış</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parametr</th>
+                            <th>Type</th>
+                            <th>Təsvir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>-type f</code></td>
+                            <td>File</td>
+                            <td>Adi file-ları tapır</td>
+                        </tr>
+                        <tr>
+                            <td><code>-type d</code></td>
+                            <td>Directory</td>
+                            <td>Directory-ləri tapır</td>
+                        </tr>
+                        <tr>
+                            <td><code>-type l</code></td>
+                            <td>Link</td>
+                            <td>Symbolic link-ləri tapır</td>
+                        </tr>
+                        <tr>
+                            <td><code>-type s</code></td>
+                            <td>Socket</td>
+                            <td>Socket file-larını tapır</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block">
+<code><span class="comment"># Yalnız file-ları tap</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type f</span>
+
+<span class="comment"># Yalnız directory-ləri tap</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type d</span>
+
+<span class="comment"># Symbolic link-ləri tap</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type l</span></code>
+                </div>
+
+                <h4>3️⃣ Size-a Görə Axtarış</h4>
+                <div class="info-box">
+                    <strong>Size vahidləri:</strong>
+                    <ul>
+                        <li><strong>c</strong> - byte</li>
+                        <li><strong>k</strong> - kilobyte</li>
+                        <li><strong>M</strong> - megabyte</li>
+                        <li><strong>G</strong> - gigabyte</li>
+                    </ul>
+                </div>
+
+                <div class="code-block">
+<code><span class="comment"># 1 GB-dan böyük file-lar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-size</span> +1G
+
+<span class="comment"># 1 MB-dan kiçik file-lar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-size</span> -1M
+
+<span class="comment"># Dəqiq 414 byte olan file-lar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-size</span> 414c
+
+<span class="comment"># 100KB ilə 500KB arası file-lar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-size</span> +100k <span class="option">-size</span> -500k</code>
+                </div>
+
+                <h4>4️⃣ Time-a Görə Axtarış</h4>
+                <div class="grid">
+                    <div class="card">
+                        <h4>-mtime (Modification time)</h4>
+                        <div class="code-block">
+<code><span class="comment"># 7 gündən çox əvvəl dəyişdirilib</span>
+<span class="command">find</span> . <span class="option">-mtime</span> +7
+
+<span class="comment"># Son 24 saatda dəyişdirilib</span>
+<span class="command">find</span> . <span class="option">-mtime</span> 0</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>-atime (Access time)</h4>
+                        <div class="code-block">
+<code><span class="comment"># Son 24 saatda açılıb</span>
+<span class="command">find</span> . <span class="option">-atime</span> 1
+
+<span class="comment"># 30 gündən çox açılmayıb</span>
+<span class="command">find</span> . <span class="option">-atime</span> +30</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>-ctime (Change time)</h4>
+                        <div class="code-block">
+<code><span class="comment"># Son 3 gündə dəyişib</span>
+<span class="command">find</span> . <span class="option">-ctime</span> -3</code>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>5️⃣ Permission-lara Görə Axtarış</h4>
+                <div class="code-block">
+<code><span class="comment"># Dəqiq 0644 permission-u olan file-lar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-perm</span> 0644
+
+<span class="comment"># Ən azı owner-in read/write permission-u olan file-lar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-perm</span> -0600
+
+<span class="comment"># Hamı üçün writable olan file-lar (təhlükəli!)</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-perm</span> -0002
+
+<span class="comment"># Executable file-lar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-perm</span> /u+x</code>
+                </div>
+
+                <h4>6️⃣ Boş File-lar və Directory-lər</h4>
+                <div class="code-block">
+<code><span class="comment"># Boş file-ları tap</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type f -empty</span>
+
+<span class="comment"># Boş directory-ləri tap</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type d -empty</span>
+
+<span class="comment"># Boş file-ları sil</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type f -empty -delete</span></code>
+                </div>
+
+                <h3>Tapılan File-lar Üzərində Əməliyyatlar</h3>
+
+                <h4>-exec Parametri</h4>
+                <div class="warning-box">
+                    <strong>⚠️ Diqqət:</strong> <code>-exec</code> ilə command-lar icra edərkən diqqətli olun! Xüsusilə <code>rm</code> (delete) command-ı ilə.
+                </div>
+
+                <div class="code-block">
+<code><span class="comment"># Bütün .log file-larını sil</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-name</span> <span class="string">"*.log"</span> <span class="option">-exec</span> rm {} \;
+
+<span class="comment"># File-ların ətraflı list-ini göstər</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type f -exec</span> ls -lh {} \;
+
+<span class="comment"># File-ların içində "error" sözünü axtar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type f -exec</span> grep -Hi <span class="string">"error"</span> {} \;
+
+<span class="comment"># Bütün .txt file-larını backup directory-sinə copy et</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-name</span> <span class="string">"*.txt"</span> <span class="option">-exec</span> cp {} /backup/ \;
+
+<span class="comment"># File-ların permission-larını dəyişdir</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type f -exec</span> chmod 644 {} \;</code>
+                </div>
+
+                <h4>-delete Parametri</h4>
+                <div class="code-block">
+<code><span class="comment"># .tmp file-larını sil</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-name</span> <span class="string">"*.tmp"</span> <span class="option">-delete</span>
+
+<span class="comment"># 30 gündən köhnə log file-larını sil</span>
+<span class="command">find</span> <span class="string">/var/log</span> <span class="option">-name</span> <span class="string">"*.log"</span> <span class="option">-mtime</span> +30 <span class="option">-delete</span></code>
+                </div>
+
+                <h3>Condition-ların Birləşdirilməsi</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operator</th>
+                            <th>Təsvir</th>
+                            <th>Nümunə</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>-and</code> və ya <code>-a</code></td>
+                            <td>AND (hər iki condition doğru olmalıdır)</td>
+                            <td>Default davranış</td>
+                        </tr>
+                        <tr>
+                            <td><code>-or</code> və ya <code>-o</code></td>
+                            <td>OR (ən azı bir condition doğru olmalıdır)</td>
+                            <td>Alternative condition-lar</td>
+                        </tr>
+                        <tr>
+                            <td><code>-not</code> və ya <code>!</code></td>
+                            <td>NOT (condition-u inkar edir)</td>
+                            <td>Exception condition-lar</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block">
+<code><span class="comment"># .pdf VƏ 1MB-dan böyük file-lar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-name</span> <span class="string">"*.pdf"</span> <span class="option">-and -size</span> +1M
+
+<span class="comment"># .jpg YAXUD .png file-ları</span>
+<span class="command">find</span> <span class="string">.</span> \( <span class="option">-name</span> <span class="string">"*.jpg"</span> <span class="option">-or -name</span> <span class="string">"*.png"</span> \)
+
+<span class="comment"># .log file-ları istisna olmaqla bütün file-lar</span>
+<span class="command">find</span> <span class="string">.</span> <span class="option">-type f -not -name</span> <span class="string">"*.log"</span>
+
+<span class="comment"># Complex condition: .pdf və ya .doc, amma 10MB-dan kiçik</span>
+<span class="command">find</span> <span class="string">.</span> \( <span class="option">-name</span> <span class="string">"*.pdf"</span> <span class="option">-o -name</span> <span class="string">"*.doc"</span> \) <span class="option">-and -size</span> -10M</code>
+                </div>
+            </section>
+
+            <!-- GREP SECTION -->
+            <section id="grep">
+                <h2>🔍 Grep Komandası</h2>
+                
+                <p><strong>Grep</strong> (Global Regular Expression Print) file-ların içində text pattern-lərini axtarmaq üçün istifadə olunan güclü bir komandadır. Bu tool text processing və log file-larının analizində əvəzolunmazdır.</p>
+
+                <h3>Əsas Sintaksis</h3>
+                <div class="code-block">
+<code><span class="command">grep</span> <span class="option">[options]</span> <span class="string">"pattern"</span> <span class="option">file(s)</span></code>
+                </div>
+
+                <h3>Əsas İstifadə</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Tək File-da Axtarış</h4>
+                        <div class="code-block">
+<code><span class="command">grep</span> <span class="string">"error"</span> log.txt</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>Çoxlu File-da Axtarış</h4>
+                        <div class="code-block">
+<code><span class="command">grep</span> <span class="string">"error"</span> *.log</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>Recursive Axtarış</h4>
+                        <div class="code-block">
+<code><span class="command">grep</span> <span class="option">-r</span> <span class="string">"error"</span> /var/log/</code>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Tez-tez İstifadə Olunan Parametrlər</h3>
+
+                <h4>1️⃣ Əsas Parametrlər</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parametr</th>
+                            <th>Təsvir</th>
+                            <th>Nümunə</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>-i</code></td>
+                            <td>Case-insensitive axtarış</td>
+                            <td><code>grep -i "error" log.txt</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>-v</code></td>
+                            <td>Match OLMAYAN line-ları göstər</td>
+                            <td><code>grep -v "debug" log.txt</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>-n</code></td>
+                            <td>Line number-lərini göstər</td>
+                            <td><code>grep -n "error" log.txt</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>-c</code></td>
+                            <td>Match olan line-ların count-unu göstər</td>
+                            <td><code>grep -c "error" log.txt</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>-w</code></td>
+                            <td>Yalnız whole word-ü axtar</td>
+                            <td><code>grep -w "error" log.txt</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>-l</code></td>
+                            <td>Yalnız file name-lərini göstər</td>
+                            <td><code>grep -l "error" *.log</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>-o</code></td>
+                            <td>Yalnız match olan hissəni göstər</td>
+                            <td><code>grep -o "error" log.txt</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>-r</code> / <code>-R</code></td>
+                            <td>Recursive search</td>
+                            <td><code>grep -r "error" /var/log/</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>2️⃣ Context Parametrləri</h4>
+                <div class="info-box">
+                    <strong>💡 Context parametrləri:</strong> Match olan line-ın ətrafındakı line-ları görmək üçün istifadə olunur.
+                </div>
+
+                <div class="code-block">
+<code><span class="comment"># Match-dan SONRA 3 line göstər</span>
+<span class="command">grep</span> <span class="option">-A 3</span> <span class="string">"error"</span> log.txt
+
+<span class="comment"># Match-dan ƏVVƏL 2 line göstər</span>
+<span class="command">grep</span> <span class="option">-B 2</span> <span class="string">"error"</span> log.txt
+
+<span class="comment"># Match-dan ƏVVƏL və SONRA 5 line göstər</span>
+<span class="command">grep</span> <span class="option">-C 5</span> <span class="string">"error"</span> log.txt</code>
+                </div>
+
+                <h4>3️⃣ Rəng və Görünüş</h4>
+                <div class="code-block">
+<code><span class="comment"># Match-ları rəngli göstər</span>
+<span class="command">grep</span> <span class="option">--color=auto</span> <span class="string">"error"</span> log.txt
+
+<span class="comment"># File adını və line number-ini göstər</span>
+<span class="command">grep</span> <span class="option">-Hn</span> <span class="string">"error"</span> *.log
+
+<span class="comment"># Yalnız match sayını göstər</span>
+<span class="command">grep</span> <span class="option">-c</span> <span class="string">"error"</span> log.txt</code>
+                </div>
+
+                <h3>Regular Expressions (Regex)</h3>
+
+                <h4>Əsas Regex Element-ləri</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Element</th>
+                            <th>Təsvir</th>
+                            <th>Nümunə</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>.</code></td>
+                            <td>İstənilən bir symbol</td>
+                            <td><code>grep "e.ror" file.txt</code> → error, e1ror</td>
+                        </tr>
+                        <tr>
+                            <td><code>*</code></td>
+                            <td>Sıfır və ya daha çox repeat</td>
+                            <td><code>grep "er*or" file.txt</code> → eor, eror, errrror</td>
+                        </tr>
+                        <tr>
+                            <td><code>+</code></td>
+                            <td>Bir və ya daha çox repeat</td>
+                            <td><code>grep -E "er+or" file.txt</code> → eror, errrror</td>
+                        </tr>
+                        <tr>
+                            <td><code>?</code></td>
+                            <td>Sıfır və ya bir repeat</td>
+                            <td><code>grep -E "colou?r" file.txt</code> → color, colour</td>
+                        </tr>
+                        <tr>
+                            <td><code>^</code></td>
+                            <td>Line-ın başlanğıcı</td>
+                            <td><code>grep "^Error" file.txt</code> → Error ilə başlayan</td>
+                        </tr>
+                        <tr>
+                            <td><code>$</code></td>
+                            <td>Line-ın sonu</td>
+                            <td><code>grep "error$" file.txt</code> → error ilə bitən</td>
+                        </tr>
+                        <tr>
+                            <td><code>[abc]</code></td>
+                            <td>a, b və ya c symbolu</td>
+                            <td><code>grep "[aeiou]" file.txt</code> → vowel-lər</td>
+                        </tr>
+                        <tr>
+                            <td><code>[^abc]</code></td>
+                            <td>a, b və c istisna olmaqla</td>
+                            <td><code>grep "[^0-9]" file.txt</code> → digit olmayanlar</td>
+                        </tr>
+                        <tr>
+                            <td><code>[A-Z]</code></td>
+                            <td>Hər hansı uppercase letter</td>
+                            <td><code>grep "[A-Z]" file.txt</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>[0-9]</code></td>
+                            <td>Hər hansı digit</td>
+                            <td><code>grep "[0-9]" file.txt</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Extended Regex (-E parametri)</h4>
+                <div class="code-block">
+<code><span class="comment"># error YAXUD warning axtar</span>
+<span class="command">grep</span> <span class="option">-E</span> <span class="string">"error|warning"</span> log.txt
+
+<span class="comment"># Email address-ləri tap</span>
+<span class="command">grep</span> <span class="option">-E</span> <span class="string">"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"</span> file.txt
+
+<span class="comment"># IP address-ləri tap</span>
+<span class="command">grep</span> <span class="option">-E</span> <span class="string">"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"</span> log.txt
+
+<span class="comment"># 3-dən 5-ə qədər digit axtar</span>
+<span class="command">grep</span> <span class="option">-E</span> <span class="string">"[0-9]{3,5}"</span> file.txt</code>
+                </div>
+
+                <h3>Grep Variantları</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>egrep</h4>
+                        <p>Extended grep (grep -E ilə eynidir)</p>
+                        <div class="code-block">
+<code><span class="command">egrep</span> <span class="string">"error|warning"</span> log.txt</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>fgrep</h4>
+                        <p>Fast grep (grep -F ilə eynidir, regex yoxdur)</p>
+                        <div class="code-block">
+<code><span class="command">fgrep</span> <span class="string">"literal.string"</span> file.txt</code>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>zgrep</h4>
+                        <p>Compressed file-larda axtarış</p>
+                        <div class="code-block">
+<code><span class="command">zgrep</span> <span class="string">"error"</span> log.gz</code>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EXAMPLES SECTION -->
+            <section id="examples">
+                <h2>💡 Praktiki Nümunələr</h2>
+
+                <h3>Find ilə Praktiki Nümunələr</h3>
+
+                <div class="example-box">
+                    <h4>1. Home directory-də "hesabat.pdf" file-ını tap</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">~</span> <span class="option">-name</span> <span class="string">"hesabat.pdf"</span></code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>2. Son 3 gündə modified edilmiş directory-ləri tap</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">.</span> <span class="option">-type d -mtime</span> -3</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>3. Empty file-ları tapıb sil</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">/tmp</span> <span class="option">-type f -empty -delete</span></code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>4. 100MB-dan böyük log file-larını tap</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">/var/log</span> <span class="option">-name</span> <span class="string">"*.log"</span> <span class="option">-size</span> +100M</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>5. Son 7 gündə dəyişməmiş köhnə backup file-larını sil</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">/backup</span> <span class="option">-name</span> <span class="string">"*.bak"</span> <span class="option">-mtime</span> +7 <span class="option">-delete</span></code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>6. Hamı üçün writable olan file-ları tap (security yoxlaması)</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">/</span> <span class="option">-type f -perm</span> -0002 2>/dev/null</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>7. Müəyyən user-ə aid file-ları tap</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">/home</span> <span class="option">-user</span> huseyn <span class="option">-type f</span></code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>8. PHP file-larında "TODO" comment-lərini tap</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">.</span> <span class="option">-name</span> <span class="string">"*.php"</span> <span class="option">-exec</span> grep -Hn <span class="string">"TODO"</span> {} \;</code>
+                    </div>
+                </div>
+
+                <h3>Grep ilə Praktiki Nümunələr</h3>
+
+                <div class="example-box">
+                    <h4>1. System log-larda "ERROR" axtar (case-insensitive)</h4>
+                    <div class="code-block">
+<code><span class="command">grep</span> <span class="option">-i</span> <span class="string">"error"</span> /var/log/syslog</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>2. Bütün .txt file-larda "password" sözünü tap</h4>
+                    <div class="code-block">
+<code><span class="command">grep</span> <span class="option">-r</span> <span class="string">"password"</span> *.txt</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>3. "login" sözünü və ətrafındakı 2 line-ı göstər</h4>
+                    <div class="code-block">
+<code><span class="command">grep</span> <span class="option">-C 2</span> <span class="string">"login"</span> auth.log</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>4. IP address-ləri tap</h4>
+                    <div class="code-block">
+<code><span class="command">grep</span> <span class="option">-E</span> <span class="string">"([0-9]{1,3}\.){3}[0-9]{1,3}"</span> access.log</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>5. Error sayını hər file üçün say</h4>
+                    <div class="code-block">
+<code><span class="command">grep</span> <span class="option">-c</span> <span class="string">"error"</span> *.log</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>6. Python file-larında "import" ilə başlayan line-ları tap</h4>
+                    <div class="code-block">
+<code><span class="command">grep</span> <span class="option">-rn</span> <span class="string">"^import "</span> --include=<span class="string">"*.py"</span></code>
+                    </div>
+                </div>
+
+                <h3>Find və Grep Birlikdə</h3>
+
+                <div class="example-box">
+                    <h4>1. Bütün PHP file-larında "mysqli_connect" axtar</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">.</span> <span class="option">-name</span> <span class="string">"*.php"</span> <span class="option">-exec</span> grep -Hn <span class="string">"mysqli_connect"</span> {} \;</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>2. Son 7 gündə modified edilmiş log file-larında "failed" axtar</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">/var/log</span> <span class="option">-name</span> <span class="string">"*.log"</span> <span class="option">-mtime</span> -7 <span class="option">-exec</span> grep -l <span class="string">"failed"</span> {} \;</code>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>3. Root directory-də 777 permission-lu file-ları tap və list et</h4>
+                    <div class="code-block">
+<code><span class="command">find</span> <span class="string">/</span> <span class="option">-type f -perm</span> 0777 2>/dev/null | <span class="command">grep</span> <span class="option">-v</span> <span class="string">"/proc"</span></code>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TIPS SECTION -->
+            <section id="tips">
+                <h2>⚡ İpuçları və Tövsiyələr</h2>
+
+                <div class="grid">
+                    <div class="card">
+                        <h4>🚀 Performance</h4>
+                        <ul>
+                            <li>Mümkünsə search path-ini məhdudlaşdırın</li>
+                            <li><code>-prune</code> istifadə edərək lazımsız directory-ləri skip edin</li>
+                            <li>Böyük file-lar üçün <code>grep -F</code> (literal search) daha sürətlidir</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>🔒 Security</h4>
+                        <ul>
+                            <li><code>-exec rm</code> istifadə etməzdən əvvəl həmişə yoxlayın</li>
+                            <li>Əvvəlcə <code>-ls</code> ilə result-ları görün</li>
+                            <li>Root olaraq search edərkən xüsusilə diqqətli olun</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>💾 Disk Yoxlaması</h4>
+                        <div class="code-block">
+<code><span class="comment"># Ən böyük 10 file-ı tap</span>
+<span class="command">find</span> . -type f -exec du -h {} + | sort -rh | head -10</code>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>📝 Log Təhlili</h4>
+                        <div class="code-block">
+<code><span class="comment"># Ən çox təkrarlanan error-lar</span>
+<span class="command">grep</span> -i error *.log | sort | uniq -c | sort -rn</code>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h4>🔍 Debugging</h4>
+                        <ul>
+                            <li>Error message-ları <code>2>/dev/null</code> ilə hide edin</li>
+                            <li><code>-print</code> ilə result-ları test edin</li>
+                            <li>Complex command-ları hissə-hissə test edin</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h4>⏱️ Vaxt Qənaəti</h4>
+                        <ul>
+                            <li>Tez-tez istifadə olunan command-lar üçün alias yaradın</li>
+                            <li>Shell script-lərində istifadə edin</li>
+                            <li>History-dən command-ları yenidən istifadə edin</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Faydalı Alias-lar</h3>
+                <div class="code-block">
+<code><span class="comment"># ~/.bashrc və ya ~/.zshrc file-ına əlavə edin</span>
+
+<span class="comment"># Rəngli grep</span>
+alias grep=<span class="string">'grep --color=auto'</span>
+
+<span class="comment"># Son modified edilmiş file-ları tap</span>
+alias findlast=<span class="string">'find . -type f -mtime -1'</span>
+
+<span class="comment"># Böyük file-ları tap</span>
+alias findbig=<span class="string">'find . -type f -size +100M'</span>
+
+<span class="comment"># Code içində search et</span>
+alias codesearch=<span class="string">'grep -rn --include="*.php" --include="*.js"'</span></code>
+                </div>
+
+                <h3>Ümumi Error-lar və Həllər</h3>
+                <div class="warning-box">
+                    <h4>⚠️ Tez-tez Rast Gəlinən Problem-lər:</h4>
+                    <ol>
+                        <li><strong>Permission denied error-ları:</strong>
+                            <div class="code-block">
+<code><span class="command">find</span> / -name <span class="string">"fayl.txt"</span> 2>/dev/null  <span class="comment"># Error-ları hide edir</span></code>
+                            </div>
+                        </li>
+                        <li><strong>Çox uzun result list-i:</strong>
+                            <div class="code-block">
+<code><span class="command">find</span> . -name <span class="string">"*.log"</span> | head -20  <span class="comment"># İlk 20 result</span></code>
+                            </div>
+                        </li>
+                        <li><strong>Regex işləmir:</strong>
+                            <div class="code-block">
+<code><span class="command">grep</span> <span class="option">-E</span> <span class="string">"pattern"</span>  <span class="comment"># Extended regex istifadə edin</span></code>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+
+                <h3>Əlavə Qaynaqlar</h3>
+                <div class="info-box">
+                    <h4>📚 Daha ətraflı məlumat üçün:</h4>
+                    <ul>
+                        <li><code>man find</code> - Find üçün tam manual</li>
+                        <li><code>man grep</code> - Grep üçün tam manual</li>
+                        <li><code>info coreutils 'find invocation'</code> - Ətraflı nümunələr</li>
+                        <li><code>tldr find</code> - Sadələşdirilmiş nümunələr (tldr package-ini install edin)</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p><strong>Linux Find və Grep Komandaları Dokumentasiyası</strong></p>
+            <p>DevOps mütəxəssisləri üçün hazırlanmışdır</p>
+            <p style="margin-top: 10px; opacity: 0.8;">© 2024 - Bütün hüquqlar qorunur</p>
+        </footer>
+    </div>
+</body>
+</html>
